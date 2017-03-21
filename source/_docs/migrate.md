@@ -77,5 +77,5 @@ Anyone wishing to migrate a Drupal 6 site to Pantheon can work with one of our L
 
 ## See Also
 * [Going Live](/docs/going-live)
-* [Getting Started](/docs/getting-started)
+* [Getting Started](/docs/guides/getting-started)
 * [Using the Pantheon Workflow](/docs/pantheon-workflow)

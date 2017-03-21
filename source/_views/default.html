@@ -100,7 +100,9 @@
         <div class="row">
           <div class="col-md-12 mb-20">
             {% if page.terminuspage is not defined %}
-            {% include("breadcrumb.html") %}
+              {% if page.guidepage is not defined %}
+                {% include("breadcrumb.html") %}
+              {% endif %}
             {% endif %}
           </div>
         {% endif %}

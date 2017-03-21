@@ -10,7 +10,7 @@ This article covers some best practices and recommendations for building a Drupa
 
 ## Initial Site Setup
 
-After you've [created your site on Pantheon](/docs/getting-started/), you'll need to set up your local environment.
+After you've [created your site on Pantheon](/docs/create-sites/), you'll need to set up your local environment.
 
 ## Clone the Code Repository
 
