@@ -1,8 +1,8 @@
 ---
 title: MySQL Troubleshooting with New Relic Pro
 description: Use integrated reporting services with New Relic Pro to isolate MySQL performance issues on your Drupal or WordPress sites.
-tags: [performance, troubleshoot]
-categories: [performance, troubleshoot]
+tags: [newrelic, debugdb]
+categories: []
 ---
 While going through MySQL and PHP slow logs is a great way to find issues, modern reporting services that are integrated with your site help speed the process up tremendously. There are a few different systems to choose from, but at Pantheon we use [New Relic Pro](/docs/new-relic). This article explains how you can troubleshoot MySQL databases with New Relic Pro. 
 
@@ -34,7 +34,7 @@ Using the information from the New Relic trace, find the full query in the slow 
  ![Review slow low](/source/docs/assets/images/review-slow-log.png)​  
 Close out the SFTP session and get the MySQL CLI information for the Test MySQL server. If the Test server has major differences from your Live server, you can either connect to Live (not recommended) or clone your Live database to your Dev or Test environment via your Pantheon Dashboard. Once this is done, connect to the MySQL server of your choice and run the query.  
  ![Execute the query](/source/docs/assets/images/execute-query.png)  
-If the result confirm your suspicions, as this one does, delve in deeper to find out why the query is behaving so badly. Type [EXPLAIN](http://dev.mysql.com/doc/refman/5.0/en/explain.html) and then re-paste the query. MySQL will display extended information on how it’s [executing the query](http://dev.mysql.com/doc/refman/5.0/en/using-explain.html). Look for really odd things. For example, this one really doesn't look that bad, except the users table is referenced twice via alias and there isn't a single key index being used to search them.
+If the result confirm your suspicions, as this one does, delve in deeper to find out why the query is behaving so badly. Type [EXPLAIN](https://dev.mysql.com/doc/refman/5.7/en/explain.html) and then re-paste the query. MySQL will display extended information on how it’s [executing the query](https://dev.mysql.com/doc/refman/5.7/en/using-explain.html). Look for really odd things. For example, this one really doesn't look that bad, except the users table is referenced twice via alias and there isn't a single key index being used to search them.
  ![Extended information example](/source/docs/assets/images/extended-info-example.png)  
 Looking at that table with a MySQL `describe` command shows that there is no primary key set on the UID field.  
  ![MySQL table describe users](/source/docs/assets/images/mysql-table-describe-users.png)  

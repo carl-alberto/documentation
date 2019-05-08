@@ -1,10 +1,10 @@
 ---
 title: Caching in Drupal Modules
 description: Configure your Drupal site's performance and caching settings to make significant improvements.
-tags: [performance, cache]
-categories: [performance, cache]
+tags: [cacheapp]
+categories: [drupal]
 ---
-While configuring [Drupal's performance and caching settings](/docs/drupal-cache) and using [redis as a Drupal caching backend](/docs/redis) will make a significant performance difference, not every module uses Drupal's caching out of the box.
+While configuring [Drupal's performance and caching settings](/docs/drupal-cache) and using [Redis as a Drupal caching backend](/docs/redis/) will make a significant performance difference, not every module uses Drupal's caching out of the box.
 
 ## Views
 
@@ -25,8 +25,8 @@ Views has a very granular caching system, down to the individual View display. T
 2. Edit the View in question.
 3. Select the display and click **Advanced**.
 4. Click the option next to Caching.
-5. Choose **Time-Based Caching** and click **Apply**.  
-  Rendered output: (something other than Never Cache)  
+5. Choose **Time-Based Caching** and click **Apply**.
+  Rendered output: (something other than Never Cache)
   Query results: (something other than Never Cache)
 
 ### Configure Views Block Caching

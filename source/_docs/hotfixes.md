@@ -1,8 +1,8 @@
 ---
 title: Hotfixes
 description: Learn how to deploy and test hot fixes and preserve orphan commits on your Pantheon Drupal or WordPress site.
-tags: [troubleshoot, git]
-categories: [troubleshoot]
+tags: [debugcode]
+categories: []
 ---
 For Experts only. You should not need to attempt this if you use [Multidev](/docs/multidev) and keep commits from reaching Dev that you do not intend on deploying.
 
@@ -61,10 +61,11 @@ You are now ready to start work based on the state of the live site.
 
 3. Create new branch and start working:
 
+    ```
     git checkout -b hotfix
 
     git commit -a -m "Hotfix issue xyz"
-
+    ```
 
 ## Generate a New Hotfix Test Tag
 
@@ -92,9 +93,7 @@ If your tests pass, you will need to repeat the process to deploy your changes t
 
 On Pantheon an orphan commit is any commit that exists on the Test or Live environment, but not in the master branch.
 
-We alert you of these commits because they are vulnerable to being overwritten with the default code workflow. Even when making hotfixes, your workflow should push those changes into the master branch. Since we have no way of knowing which future commit will contain those changes, we want you to be aware of potential code loss.
-
-The alert message on the Live environment is only indicating that orphan commits exist. The tags/labels on the right side of the commit message lets you know which environments the commits exist in.
+Even when making hotfixes, your workflow should push those changes into the master branch. Since we have no way of knowing which future commit will contain those changes, we want you to be aware of potential code loss.
 
 If you do want to preserve the orphan commits, follow these Git commands to make a clean merge:
 

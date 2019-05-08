@@ -1,4 +1,5 @@
 sculpin:
+    ignore: ["**/*.swp", "**/*.un~"]
 sculpin_theme:
     theme: sculpin/bootstrap-3-blog-theme
 sculpin_content_types:
@@ -28,3 +29,92 @@ sculpin_content_types:
             - categories
             - tags
             - contributors
+
+    quickstartpages:
+        type: path
+        path: docs/guides/quickstart
+        permalink: pretty
+        singular_name: quickstartpage
+        enabled: true
+        layout: guide
+        taxonomies:
+            - categories
+            - tags
+            - contributors
+    launchpages:
+        type: path
+        path: docs/guides/launch
+        permalink: pretty
+        singular_name: launchpage
+        enabled: true
+        layout: guide
+        taxonomies:
+            - categories
+            - tags
+            - contributors
+    pagerdutypages:
+        type: path
+        path: docs/guides/pagerduty
+        permalink: pretty
+        singular_name: pagerdutypage
+        enabled: true
+        layout: guide
+        taxonomies:
+            - categories
+            - tags
+            - contributors
+    buildtoolspages:
+        type: path
+        path: docs/guides/build-tools
+        permalink: pretty
+        singular_name: buildtoolspage
+        enabled: true
+        layout: guide
+        taxonomies:
+            - categories
+            - tags
+            - contributors
+    edtpages:
+        type: path
+        path: docs/guides/edt
+        permalink: pretty
+        singular_name: edtpage
+        enabled: true
+        layout: guide
+        taxonomies:
+            - categories
+            - tags
+            - contributors
+    gitwordpresspages:
+            type: path
+            path: docs/guides/wordpress-git
+            permalink: pretty
+            singular_name: gitwordpresspage
+            enabled: true
+            layout: guide
+            taxonomies:
+                - categories
+                - tags
+                - contributors
+    multisitepages:
+            type: path
+            path: docs/guides/multisite
+            permalink: pretty
+            singular_name: multisitepage
+            enabled: true
+            layout: guide
+            taxonomies:
+                - categories
+                - tags
+                - contributors
+    woocommercepages:
+            type: path
+            path: docs/guides/woocommerce
+            permalink: pretty
+            singular_name: woocommercepage
+            enabled: true
+            layout: guide
+            taxonomies:
+                - categories
+                - tags
+                - contributors

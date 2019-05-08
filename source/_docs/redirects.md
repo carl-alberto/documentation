@@ -1,256 +1,224 @@
 ---
-title: Redirect Incoming Requests
-description: Learn to redirect requests to an alternate Drupal or WordPress domain name or path via PHP.
-tags: [domains, migrate, golive]
-categories: [golive, domains]
+title: Configure Redirects
+description: Review considerations and recommendations on how to handle redirect logic via PHP within your site's configuration file.
+tags: [redirects, variables, dns]
+categories: []
 ---
-It's often useful to redirect requests to a different domain or path. While it's technically possible to use Drupal or WordPress to perform the redirect, it's faster and more efficient to redirect without having to fully bootstrap your web application.  
-<div class="alert alert-danger" role="alert">
-<h4 class="info">Warning</h4>
-<p>When using multiple snippets, be sure to step through the logic. This is particularly important when redirecting to a common domain while also incorporating redirects for specific pages. All <code>if</code> conditional statements need to be in the correct order. For example, a wholesale redirect executed <em>prior</em> to redirects for specific pages would likely prevent the second statement from being evaluated.</p>
-</div>
+Configure redirects within `settings.php` (Drupal) or `wp-config.php` (WordPress), adjusting placeholder values within snippets as needed (e.g., `example.com`).
 
+## Considerations
+### PHP vs htaccess
+Pantheon does not support managing redirects in `.htaccess` files, since they are ignored by [NGINX](https://www.nginx.com/resources/wiki/#){.external} for reduced resource consumption and increased efficiency. This configuration is standard across all Pantheon sites, and modifications to the `nginx.conf` file are not supported.
 
-## Redirecting via PHP instead of .htaccess
-
-Pantheon uses nginx webservers for optimal performance. While completely compatible with Drupal or WordPress, nginx does not recognize or parse Apache's directory-level configuration files, known as `.htaccess` files. Instead, redirect logic should be stored in the site's `settings.php` for Drupal or `wp-config.php` for WordPress.  
-
-<div class="alert alert-info" role="alert">
-<h4 class="info">Note</h4>
-<p>Drupal 7 sites on Pantheon do not require a <code>sites/default/settings.php</code> file to run, and depending on how your site was created it might not have one. If it's missing, just create an empty PHP file and proceed. For more information, see <a href="/docs/settings-php">Configuring settings.php</a>.</p></div>
-
-
-Some advantages of redirecting via PHP instead of `.htaccess` include:
+Using `.htaccess` is generally not recommended - even for sites running  [Apache](https://httpd.apache.org/docs/trunk/howto/htaccess.html#when){.external}. Instead, we suggest handling redirects in PHP within your site's configuration file. Some advantages of redirecting via PHP instead of `.htaccess` include:
 
 - Logic and decisions can be made that a web server would have no context for, as it's executable code with application state awareness. Conditional logic, regular expressions, and much more are possible.
-- Configuration tends to be more maintainable as Drupal and WordPress developers are typically literate in PHP, but very few people are naturally fluent in Apache2 rewrite rules and conditions.
-- Since `settings.php` and `wp-config.php` are parsed very early in the bootstrap process, redirects like this are "cheap" with low overhead. If you use a 301 redirect, Varnish will cache it as well.
+- Configuration tends to be more maintainable as Drupal and WordPress developers are typically more familiar with PHP than Apache rewrite rules.
+- Since `settings.php` and `wp-config.php` are parsed very early in the bootstrap process, redirects like this are "cheap" with low overhead. If you use a 301 redirect, the [Pantheon Global CDN](/docs/global-cdn/) will cache it as well.
 
-<div class="alert alert-info" role="alert">
-<h4 class="info">Note</h4>
-<p>Automatic resolution of domains is not supported. For each domain that you want to resolve to Pantheon, add a hostname with a matching record to an environment on the <a href="/docs/domains#step-2-add-domains-to-the-site-environment" data-proofer-ignore> site's Dashboard</a>.</p>
-</div>
+### Avoid Excessive Redirects
+When using multiple snippets, be sure to step through the logic. This is particularly important when redirecting to a common domain while also incorporating redirects for specific pages. All `if` conditional statements need to be in the correct order. For example, a wholesale redirect executed *prior* to redirects for specific pages would likely prevent the second statement from being evaluated.
 
-### Command Line Conditionals
-All redirect logic run on Pantheon environments should include the `php_sapi_name() != "cli"` conditional statement to see if WordPress or Drupal is running via the command line. Otherwise, redirects kill the PHP process before Drush and WP-CLI is executed resulting in a silent failure:
+## Redirect to HTTPS and the Primary Domain
+This redirect is considered best practice and recommended as part of the going live procedure. Configure this redirect after connecting a custom domain in the Site Dashboard when you're ready to launch the site. For details, see [Launch Essentials](/docs/guides/launch/).
 
-```bash
-[notice] Command: <site>.<env> -- 'drush <command>' [Exit: 1]
-[error]
-```
+The following configuration will redirect HTTP to HTTPS _and_ enforce use of a primary domain, such as `http://live-site-name.pantheonsite.io` to `https://www.example.com` or `http://example.com` to `https://www.example.com`:
 
-## Redirect to a Common Domain
+{% include("redirects.twig")%}
 
-While it’s good for visitors and DNS to resolve both www and the domain itself, it's best practice to choose one or the other and redirect from www to non-www (or vice versa, your call). This optimizes SEO by avoiding duplicate content and prevents session strangeness, where a user can be logged in to one domain but logged out of other domains at the same time.
+## Additional Redirects (Optional)
+Implement scenario specific redirects as required by the site. Depending on the needs of the site, you may only need one, some, or none of the following.
 
-<div class="panel panel-video">
-  <div class="panel-heading panel-video-heading">
-    <a class="panel-video-title" data-proofer-ignore data-toggle="collapse" data-target="#redirects-video"><h3 class="panel-title panel-video-title" style="cursor:pointer;"><i style="margin-right:10px;" class="fa fa-video-camera"></i> Show me how </h3></a>
-  </div>
-  <div id="redirects-video" class="collapse" style="padding:10px;">
-    <script src="//fast.wistia.com/embed/medias/fof9qie645.jsonp" async></script><script src="//fast.wistia.com/assets/external/E-v1.js" async></script><div class="wistia_responsive_padding" style="padding:56.25% 0 0 0;position:relative;"><div class="wistia_responsive_wrapper" style="height:100%;left:0;position:absolute;top:0;width:100%;"><div class="wistia_embed wistia_async_fof9qie645 videoFoam=true" style="height:100%;width:100%">&nbsp;</div></div></div>
-  </div>
-</div>
+As described [above](#redirect-to-https-and-the-primary-domain), redirect logic should be added to `wp-config.php` for WordPress sites, and `settings.php` for Drupal sites.
+### Redirect to HTTPS
+The following configuration will redirect HTTP requests to HTTPS, such as `http://env-site-name.pantheonsite.io` to `https://env-site-name.pantheonsite.io` or `http://example.com` to `https://example.com`:
 
-### Redirect to www
+```php
+// Require HTTPS across all Pantheon environments
+// Check if Drupal or WordPress is running via command line
+if (isset($_SERVER['PANTHEON_ENVIRONMENT']) && ($_SERVER['HTTPS'] === 'OFF') && (php_sapi_name() != "cli")) {
+  if (!isset($_SERVER['HTTP_USER_AGENT_HTTPS']) || (isset($_SERVER['HTTP_USER_AGENT_HTTPS']) && $_SERVER['HTTP_USER_AGENT_HTTPS'] != 'ON')) {
 
-```
-// Require www.
-if (isset($_SERVER['PANTHEON_ENVIRONMENT']) &&
-  ($_SERVER['PANTHEON_ENVIRONMENT'] === 'live') &&
-  // Check if Drupal or WordPress is running via command line
-  (php_sapi_name() != "cli")) {
-  if ($_SERVER['HTTP_HOST'] == 'yoursite.com' ||
-      $_SERVER['HTTP_HOST'] == 'thatothersiteyouhad.com') {
     header('HTTP/1.0 301 Moved Permanently');
-    header('Location: http://www.yoursite.com'. $_SERVER['REQUEST_URI']);
+    header('Location: https://'. $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
+
+    # Name transaction "redirect" in New Relic for improved reporting (optional)
+    if (extension_loaded('newrelic')) {
+      newrelic_name_transaction("redirect");
+    }
+    
     exit();
   }
 }
 ```
 
-### Redirect from www to the Bare Domain
+### Redirect from Subdomain to Subdirectory Path
+The following configuration will redirect requests for `subdomain.example.com` to `https://example.com/subdirectory/`:
 
-If you prefer to use the bare domain, use the following code block and run your DNS settings through a service that supports CNAME flattening. For details, see <a href="/docs/domains/#step-3-configure-your-dns" data-proofer-ignore>Domains and DNS</a>.
+```php
+// Redirect subdomain to a specific path.
+// Check if Drupal or WordPress is running via command line
+if (isset($_ENV['PANTHEON_ENVIRONMENT']) && ($_SERVER['HTTP_HOST'] == 'subdomain.example.com') && (php_sapi_name() != "cli")) {
+  $newurl = 'https://www.example.com/subdirectory/'. $_SERVER['REQUEST_URI'];
+  header('HTTP/1.0 301 Moved Permanently');
+  header("Location: $newurl");
 
-<div class="alert alert-info" role="alert">
-<h4 class="info">Note</h4>
-<p>If you are running the site on a Pro plan or above with an SSL certificate, use the snippet below without configuring a CNAME flattening service. </p></div>
+  # Name transaction "redirect" in New Relic for improved reporting (optional)
+  if (extension_loaded('newrelic')) {
+    newrelic_name_transaction("redirect");
+  }
+  
+  exit();
+}
+```
 
-To direct all traffic to the bare domain using Cloudflare:
+### Redirect One Path to Another
+The following configuration will redirect requests for `example.com/old` to `https://example.com/new`:
 
- - Sign up for a service that supports CNAME flattening, such as [Cloudflare](https://www.cloudflare.com/).
- - Remove the existing A record generated by Cloudflare, then create CNAME records for www and the bare domain.
- - Add the following snippet to your settings.php or wp-config.php:
+```php
+// 301 Redirect from /old to /new
+// Check if Drupal or WordPress is running via command line
+if (($_SERVER['REQUEST_URI'] == '/old') && (php_sapi_name() != "cli")) {
+  header('HTTP/1.0 301 Moved Permanently');
+  header('Location: https://'. $_SERVER['HTTP_HOST'] . '/new');
 
- ```
-    // Redirect all traffic to non-www. For example yoursite.com
-    if (isset($_SERVER['PANTHEON_ENVIRONMENT']) &&
-      ($_SERVER['PANTHEON_ENVIRONMENT'] === 'live') &&
-      // Check if Drupal or WordPress is running via command line
-      (php_sapi_name() != "cli")) {
-      if ($_SERVER['HTTP_HOST'] == 'www.yoursite.com') {
-        header('HTTP/1.0 301 Moved Permanently');
-        header('Location: http://yoursite.com'. $_SERVER['REQUEST_URI']);
-        exit();
-      }
-    }
- ```
+  # Name transaction "redirect" in New Relic for improved reporting (optional)
+  if (extension_loaded('newrelic')) {
+    newrelic_name_transaction("redirect");
+  }
+  
+  exit();
+}
+```
+### Redirect Multiple Paths
+The following configuration will redirect requests for `example.com`, `example.com/old`, `example.com/another/path`, and  `example.com/old-path` to `https://example.com/new-path-for-all`:
 
-## Redirect to HTTPS
+```php
+$redirects = array(
+  "/",
+  "/old",
+  "/another/path",
+  "/old-path");
 
-### Require HTTPS for All Pages
-To enable HTTPS across Pantheon's Dev, Test, and Live environments for all traffic on your site (a best practice if you have a certificate), check for the `HTTP_X_SSL` code:
+// 301 Redirect from multiple paths
+// Check if Drupal or WordPress is running via command line
+if ((in_array($_SERVER['REQUEST_URI'], $redirects)) && (php_sapi_name() != "cli")) {
+  header('HTTP/1.0 301 Moved Permanently');
+  header('Location: https://'. $_SERVER['HTTP_HOST'] . '/new-path-for-all');
 
-    // Require HTTPS.
-    if (isset($_SERVER['PANTHEON_ENVIRONMENT']) &&
-      ($_SERVER['HTTPS'] === 'OFF') &&
-      // Check if Drupal or WordPress is running via command line
-      (php_sapi_name() != "cli")) {
-      if (!isset($_SERVER['HTTP_X_SSL']) ||
-      (isset($_SERVER['HTTP_X_SSL']) && $_SERVER['HTTP_X_SSL'] != 'ON')) {
-        header('HTTP/1.0 301 Moved Permanently');
-        header('Location: https://'. $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
-        exit();
-      }
-    }
+  # Name transaction "redirect" in New Relic for improved reporting (optional)
+  if (extension_loaded('newrelic')) {
+    newrelic_name_transaction("redirect");
+  }
+  
+  exit();
+}
+```
 
+### Redirect Multiple URLs
+The following configuration will redirect requests for:
 
-### Require HTTPS for Specific Pages
+ - `example.com/old-url1` to `example.com/new-url1`
+ - `example.com/old-url2` to `example.com/new-url2`
+ - `example.com/old-url3` to `example.com/new-url3`
 
-If you don't want to have your whole site under HTTPS, we recommend using a secure subdomain (e.g. secure.yoursite.com). Mixed-mode secure sessions are vulnerable. There are also edge cases with caching that can create bugs with mixed-mode HTTPS. Putting the secure pages on a secure domain prevents confusion in caching between secure/insecure content.
+```php
+// You can easily put a list of many 301 url redirects in this format
+// Trailing slashes matters here so /old-url1 is different from /old-url1/
+$redirect_targets = array(
+  '/old-url1' => '/new-url1',
+  '/old-url2' => '/new-url2',
+  '/old-url3' => '/new-url3',
+);
 
-You can implement a secure domain for a specific set of pages with Drupal modules or WordPress plugins, or in settings.php for Drupal or wp-config.php for WordPress. This example enforces a secure domain for any path that begins with `/admin`:
+if ( (isset($redirect_targets[ $_SERVER['REQUEST_URI'] ] ) ) && (php_sapi_name() != "cli") ) {
+  echo 'https://'. $_SERVER['HTTP_HOST'] . $redirect_targets[ $_SERVER['REQUEST_URI'] ];
+  header('HTTP/1.0 301 Moved Permanently');
+  header('Location: https://'. $_SERVER['HTTP_HOST'] . $redirect_targets[ $_SERVER['REQUEST_URI'] ]);
 
-    // Require HTTPS for admin pages.
-    if (isset($_SERVER['PANTHEON_ENVIRONMENT']) &&
-      ($_SERVER['HTTPS'] === 'OFF') &&
-      // Check if Drupal or WordPress is running via command line
-      (php_sapi_name() != "cli")) {
-      if (!isset($_SERVER['HTTP_X_SSL']) || $_SERVER['HTTP_X_SSL'] != 'ON') {
-        // If admin, redirect to secure.
-        if (preg_match('/^\/admin/', $_SERVER['REQUEST_URI'])) {
-          header('HTTP/1.0 301 Moved Permanently');
-          header('Location: https://secure.yoursite.com'. $_SERVER['REQUEST_URI']);
-          exit();
-        }
-      }
-    }
+  if (extension_loaded('newrelic')) {
+    newrelic_name_transaction("redirect");
+  } 
+  exit();
+}
+```
 
-### Require HTTPS and Standardize Domain
+### Redirect Multiple Subdomains
+The following configuration will redirect requests for `sub1.example.com`, `sub2.example.com`, `sub3.example.com`, and `sub4.example.com` to `https://new.example.com`:
 
-To use HTTPS everywhere and standardize on your domain (e.g. `www.yoursite.com`), combine this kind of logic into a single block:
+```php
+// Redirect multiple subdomains to a single domain.
+// Check if Drupal or WordPress is running via command line
+if (isset($_ENV['PANTHEON_ENVIRONMENT']) && ($_ENV['PANTHEON_ENVIRONMENT'] === 'live') && (php_sapi_name() != "cli")) {
+  if (in_array($_SERVER['HTTP_HOST'], array(
+    'sub1.example.com',
+    'sub2.example.com',
+    'sub3.example.com',
+    'sub4.example.com'
+  ))) {
+    header('HTTP/1.0 301 Moved Permanently');
+    header('Location: https://new.example.com'. $_SERVER['REQUEST_URI']);
 
-    // Require HTTPS, www.
-    if (isset($_SERVER['PANTHEON_ENVIRONMENT']) &&
-      ($_SERVER['PANTHEON_ENVIRONMENT'] === 'live') &&
-      // Check if Drupal or WordPress is running via command line
-      (php_sapi_name() != "cli")) {
-      if ($_SERVER['HTTP_HOST'] != 'www.yoursite.com' ||
-          !isset($_SERVER['HTTP_X_SSL']) ||
-          $_SERVER['HTTP_X_SSL'] != 'ON' ) {
-        header('HTTP/1.0 301 Moved Permanently');
-        header('Location: https://www.yoursite.com'. $_SERVER['REQUEST_URI']);
-        exit();
-      }
-    }
-
-### Require HTTPS Everywhere Except Specific Pages
-
-To use HTTPS for everything except some specific pages, such as an RSS feed:
-
-    // HTTPS logic.
-    $redirect_domain = 'www.yoursite.com';
-    if (isset($_SERVER['PANTHEON_ENVIRONMENT']) && $_SERVER['PANTHEON_ENVIRONMENT'] == 'live') &&
-    // Check if Drupal or WordPress is running via command line
-    (php_sapi_name() != "cli")) {
-      $redirect_location = '';
-      // Do not require HTTPS for specific pages.
-      if (in_array($_SERVER['REQUEST_URI'], array('/rss.xml'))) {
-        // Check if HTTPS is enabled.
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
-          $redirect_location = 'http://' . $redirect_domain . $_SERVER['REQUEST_URI'];
-        }
-      }
-      // Require HTTPS for everything else.
-      else if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != 'on') {
-        $redirect_location = 'https://' . $redirect_domain . $_SERVER['REQUEST_URI'];
-      }
-      // Perform redirect.
-      if ($redirect_location) {
-        header('HTTP/1.0 301 Moved Permanently');
-        header('Location: ' . $redirect_location);
-        exit;
-      }
+    # Name transaction "redirect" in New Relic for improved reporting (optional)
+    if (extension_loaded('newrelic')) {
+      newrelic_name_transaction("redirect");
     }
 
-## Redirect to Subdirectories or Specific URLs
+    exit();
+  }
+}
+```
 
-To redirect from a subdomain to a specific area of the site, use the following:
-
-    // Redirect subdomain to a specific path.
-    if (isset($_SERVER['PANTHEON_ENVIRONMENT']) &&
-      ($_SERVER['HTTP_HOST'] == 'subdomain.yoursite.com') &&
-      // Check if Drupal or WordPress is running via command line
-      (php_sapi_name() != "cli")) {
-      $newurl = 'http://www.yoursite.com/subdomain/'. $_SERVER['REQUEST_URI'];
-      header('HTTP/1.0 301 Moved Permanently');
-      header("Location: $newurl");
-      exit();
-    }
-
-This will redirect requests like http://subdomain.yoursite.com/some/path to http://www.yoursite.com/subdomain/some/path.
-
-The same technique works for single subdomain redirects. Just specify the path in `$newurl` without bothering with `$_SERVER['REQUEST_URI']`
-
-## Redirect From One Path to Another
-
-    // 301 Redirect from /old to /new.
-    if (($_SERVER['REQUEST_URI'] == '/old') &&
-      // Check if Drupal or WordPress is running via command line
-      (php_sapi_name() != "cli")) {
-      header('HTTP/1.0 301 Moved Permanently');
-      header('Location: /new');
-      exit();
-    }
-
-## Redirect Multiple Subdomains to a Single Domain
-
-    // Redirect multiple subdomains to a single domain.
-    if (isset($_SERVER['PANTHEON_ENVIRONMENT']) &&
-      ($_SERVER['PANTHEON_ENVIRONMENT'] === 'live') &&
-      // Check if Drupal or WordPress is running via command line
-      (php_sapi_name() != "cli")) {
-      if (in_array($_SERVER['HTTP_HOST'], array(
-        'sub1.youroldwebsite.com',
-        'sub2.youroldwebsite.com',
-        'sub3.youroldwebsite.com',
-        'sub4.youroldwebsite.com',
-        'sub5.youroldwebsite.com',
-      ))) {
-        header('HTTP/1.0 301 Moved Permanently');
-        header('Location: http://main.yournewwebsite.com'. $_SERVER['REQUEST_URI']);
-        exit();
-      }
-    }
-
-## Redirect Legacy UNIX-Style User Home Folder Paths
-
+### Redirect Legacy UNIX-Style User Home Folder Paths
 When transitioning from a system that used a tilde to indicate a home directory, the syntax is slightly different. Here's how you can parse out the username and relative path that the request was made for:
 
-    $request_parts = explode('/', $_SERVER['REQUEST_URI']);
-    $legacy_username = $legacy_path = '';
-    if (isset($request_parts[1]) && strpos($request_parts[1], '~') === 0) {
-      $legacy_username = substr($request_parts[1], 1);
-      // If FALSE, then the request was just to the username.
-      $legacy_path = substr($_SERVER['REQUEST_URI'], (strlen($request_parts[1]) + 1));
-    }
-    if ($legacy_username) {
-      // Your custom logic.
-    }
+```php
+$request_parts = explode('/', $_SERVER['REQUEST_URI']);
+$legacy_username = $legacy_path = '';
+if (isset($request_parts[1]) && strpos($request_parts[1], '~') === 0) {
+  $legacy_username = substr($request_parts[1], 1);
+  // If FALSE, then the request was just to the username.
+  $legacy_path = substr($_SERVER['REQUEST_URI'], (strlen($request_parts[1]) + 1));
+}
+if ($legacy_username) {
+  // Your custom logic.
+}
+```
 
-## Redirect to Force Lowercase Letters
-WordPress automatically forces lowercase letters within URLs using the [`sanitize_title_with_dashes()`](https://core.trac.wordpress.org/browser/tags/4.6/src/wp-includes/formatting.php#L1744) function in core. Drupal sites can force lowercase letters using the following:
+### Redirect to Force Lowercase Letters
+<!-- Nav tabs -->
+<ul class="nav nav-tabs" role="tablist">
+  <!-- Active tab -->
+  <li id="tab-1-id" role="presentation" class="active"><a href="#tab-1-anchor" aria-controls="tab-1-anchor" role="tab" data-toggle="tab">WordPress</a></li>
 
-1. Set general automatic alias settings  to **Change to lower case** within the [PathAuto](https://www.drupal.org/project/pathauto) module configuration (`/admin/build/path/pathauto`).
-2. Enable **Case Sensitive URL Checking** within the [Global Redirect](https://www.drupal.org/project/globalredirect) module configuration (`/admin/settings/globalredirect`).
+  <!-- 2nd Tab Nav -->
+  <li id="tab-2-id" role="presentation"><a href="#tab-2-anchor" aria-controls="tab-2-anchor" role="tab" data-toggle="tab">Drupal</a></li>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+  <!-- Active pane content -->
+  <div role="tabpanel" class="tab-pane active" id="tab-1-anchor" markdown="1">
+  WordPress automatically forces lowercase letters within URLs using the [`sanitize_title_with_dashes()`](https://core.trac.wordpress.org/browser/tags/4.6/src/wp-includes/formatting.php#L1744){.external} function in core.
+  </div>
+
+  <!-- 2nd pane content -->
+  <div role="tabpanel" class="tab-pane" id="tab-2-anchor" markdown="1">
+  Drupal sites can force lowercase letters using the following:
+
+  1. Set general automatic alias settings to **Change to lower case** within the [PathAuto](https://www.drupal.org/project/pathauto){.external} module configuration (`/admin/build/path/pathauto`).
+  2. Enable **Case Sensitive URL Checking** within the [Global Redirect](https://www.drupal.org/project/globalredirect){.external} module configuration (`/admin/settings/globalredirect`).
+</div>
+</div>
+
+### Redirect Files
+Because Drupal or WordPress aren't bootstrapped when static assets (e.g, images, PDFs, HTML files) are served, the PHP redirects used above will not work when these files are requested directly. You can use [CloudFlare](/docs/cloudflare/) or another stacked CDN to handle file redirects.
+
+Alternatively, you can remove the file entirely from the old location. In this case, the request will run through Drupal or WordPress. You can let the CMS serve a 404, or you can utilize a redirect in `wp-config.php` or `settings.php` as shown in the examples above.
+
+## See Also
+- [Configuring Settings.php](/docs/settings-php/)
+- [Configuring wp-config.php](/docs/wp-config-php/)
+- [Platform and Custom Domains](/docs/domains/)
+- [Launch Essentials](/docs/guides/launch/)
+- [Relaunch Existing Pantheon Site](/docs/relaunch/)

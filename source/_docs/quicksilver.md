@@ -1,10 +1,17 @@
 ---
 title: Automating and Integrating your Pantheon Workflow with Quicksilver Platform Hooks
-tags: [automate, pantheonyml]
-categories: [automate]
+description: Learn how to use Quicksilver to automate your deployment workflow.
+tags: [pantheonyml, infrastructure]
+categories: []
 ---
 
 Hook into platform workflows to automate your Pantheon workflow. Tell us which script you want to run, and we'll run it automatically every time you or another team member triggers the corresponding workflow. View (and contribute) to a [growing set of example scripts](https://github.com/pantheon-systems/quicksilver-examples/). Find examples to enable functionality like chat-ops, database sanitization, deployment logging, and automated testing operations with a CI server.
+
+<div class="enablement">
+  <h4 class="info" markdown="1">[Quicksilver Cloud Hooks Training](https://pantheon.io/agencies/learn-pantheon?docs){.external}</h4>
+  <p>Set up existing scripts and write your own with help from our experts. Pantheon delivers custom workshops to help development teams master our platform and improve their internal DevOps.</p>
+</div>
+
 
 For example, committing a `pantheon.yml` file with the following contents to the root of your site's code repository with the script adapted from [slack_notification](https://github.com/pantheon-systems/quicksilver-examples/tree/master/slack_notification) will post to Slack every time you deploy:
 
@@ -31,11 +38,12 @@ If you add the following after the previous snippet, we'll also run that script 
 
 Specify the workflows you want to hook into (e.g. `deploy` or `sync_code`), the workflow stage (`before` or `after`) and the location of the script relative to root of your site's docroot.
 
-## Type of Scripts
+## Script Type and Location
 
-`webphp`: Runs a PHP script via the same runtime environment as the website itself. PHP scripts are subject to the same limits as any code on the platform, like [timeouts](/docs/timeouts/), and cannot be batched.
+Quicksilver currently supports `webphp` scripting, which runs a PHP script via the same runtime environment as the website itself. PHP scripts are subject to the same limits as any code on the platform, like [timeouts](/docs/timeouts/), and cannot be batched. In the future we may add additional types.
 
-In the future we may add additional types.
+We recommend setting up a dedicated directory in the docroot (e.g. `private/scripts`) for tracking these files. If your site uses a [nested docroot](/docs/nested-docroot/), the scripts directory needs to be located in the  `web` subdirectory of your site's code repository (e.g. `web/private/scripts`).
+
 
 ## Hooks
 
@@ -93,7 +101,7 @@ You can hook into the following workflows:
 
 ## Debugging via Terminus
 
-Use the following [Terminus](/docs/terminus) for debugging Quicksilver.
+Use the following [Terminus](/docs/terminus) commands for debugging Quicksilver.
 
 ### Stream New Workflows to the Console
 

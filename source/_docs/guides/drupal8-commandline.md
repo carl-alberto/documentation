@@ -1,8 +1,8 @@
 ---
 title: Create a Drupal 8 Site From the Command Line Using Terminus and Drush
 description: Learn how to add modules, and manage configuration between Pantheon environments.
-tags: [cli]
-categories: [develop, cli]
+tags: [devterminus, create]
+categories: [develop, cli, moreguides]
 type: guide
 permalink: docs/guides/:basename/
 contributors:
@@ -21,7 +21,7 @@ Be sure that you:
 - Are familiar with your operating system's command line.
 - Are using a Unix-based system (Linux or Mac OS X). Windows commands may vary slightly.
 - Have created a [Pantheon account](https://dashboard.pantheon.io/register). Pantheon accounts are always free for development.
-
+- Have an [SSH key](/docs/ssh-keys/) generated, added to your Pantheon dashboard, and loaded into your local SSH agent.
 
 ## Install and Authenticate Terminus
 Terminus provides advanced interaction with the platform and allows us to run Drush commands remotely. Terminus also opens the door to automating parts of your workflow by combining multiple operations. For more information about Terminus itself, see our [Terminus Manual](/docs/terminus).
@@ -32,7 +32,7 @@ Terminus provides advanced interaction with the platform and allows us to run Dr
         cd $HOME/terminus
         curl -O https://raw.githubusercontent.com/pantheon-systems/terminus-installer/master/builds/installer.phar && php installer.phar install
 
-2.  [Generate a Machine Token](https://dashboard.pantheon.io/machine-token/create) from within **User Dashboard** > **Account** > **Machine Tokens**. Then use it to authenticate Terminus:
+2.  [Generate a Machine Token](https://dashboard.pantheon.io/login?destination=%2Fuser#account/tokens/create/terminus/) from within **User Dashboard** > **Account** > **Machine Tokens**. Then use it to authenticate Terminus:
 
         terminus auth:login --machine-token=‹machine-token›
 
@@ -67,42 +67,22 @@ If you see your Pantheon sites, then it was installed and authenticated successf
 
         terminus drush steve-site-d8.dev -- site-install -y
 
-
     Use the password included in the output of that command to sign into the site with your browser, or use this command to get a one-time login link:
 
         terminus drush  steve-site-d8.dev  -- user-login
 
-    Installing Drupal results in a one-line change to `settings.php`, which we can then review and commit. As a reminder, Drush is the command line utility for Drupal itself.	Terminus is simply passing through the Drush commands to the site on Pantheon. To get a full list of Drush commands run:
-
-        terminus drush steve-site-d8.dev -- help
-
-    The `--` signifies the end of the Terminus options, anything after `--` gets passed straight to Drush.		
-
-4. Review the file changes:
-
-  ```
-  terminus env:diffstat steve-site-d8.dev
-  ```
-
-5. Commit `settings.php` changes to the Dev environment:
-
-  ```
-  terminus env:commit steve-site-d8.dev --message="Installing Drupal"
-  ```
-
-
-6.  Create the Test environment:
+4.  Create the Test environment:
 
         terminus env:deploy steve-site-d8.test
 
-7.  Create the Live environment:
+5.  Create the Live environment:
 
         terminus env:deploy steve-site-d8.live
 
 
 ### Export the Site Name as a Variable
 
-At this point you are probably tired of replacing `steve-site-d8` in every command.		
+At this point you are probably tired of replacing `steve-site-d8` in every command.
 
 1.  Instead of having to type the site name out, let's export our site name to a variable so we can copy/paste the remainder of our commands:
 
@@ -129,7 +109,7 @@ You may want to remove these modules after you launch your site, or use more adv
 <div class="alert alert-info">
   <h4 class="info">Note</h4>
   <p markdown="1">
-  You may have heard that some Drupal 8 developers are [using Composer](https://pantheon.io/docs/composer-drupal-8/) to manage all modules. You can even use our [Terminus Composer plugin](https://github.com/pantheon-systems/terminus-composer-plugin) to run Composer commands on your Dev environment. However, for this guide we will stick to simply downloading modules with Drush.
+  You may have heard that some Drupal 8 developers are [using Composer](https://pantheon.io/docs/composer/) to manage all modules. You can even use our [Terminus Composer plugin](https://github.com/pantheon-systems/terminus-composer-plugin) to run Composer commands on your Dev environment. However, for this guide we will stick to simply downloading modules with Drush.
   </p>
 </div>
 
@@ -245,7 +225,7 @@ In the lifecycle of managing a site, you can expect content editors to add new m
 
         terminus env:deploy $TERMINUS_SITE.live --updatedb --cc --note="Deploying glossary View"
 
-        terminus drush $TERMINUS_SITE.test -- config-import -y
+        terminus drush $TERMINUS_SITE.live -- config-import -y
 
   With the change to the glossary View deployed and imported on the Live environment you should be able to see the glossary page (`/glossary`).
 

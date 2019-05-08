@@ -1,13 +1,18 @@
 ---
 title: WordPress Configuration Management (WP-CFM)
 description: Learn how to install and use the WordPress Configuration Management plugin on your Pantheon WordPress site.
-tags: [develop, sftp, git]
-categories: [develop, git]
+tags: [workflow, devwpcli]
+categories: [wordpress]
 ---
 
 Version-controlling site configuration within the codebase is a best practice. Since WordPress site configuration is stored in the database alongside content, developer workflows must account for migrating configuration from development and testing environments into production without affecting the content.
 
 The [WP-CFM](https://wordpress.org/plugins/wp-cfm/) plugin provides an elegant mechanism for enabling developers to practice configuration management in code. The plugin exports WordPress site configuration from the mysql database's `wp_options` table to a `.json` file stored in `wp-content/config`.  After deploying the file to a new environment for the same site, it can then import the configuration from the `.json` file into the second `wp_options` table.
+
+<div class="alert alert-info" role="alert">
+<h4 class="info">Note</h4>
+<p markdown="1">WP-CFM should only be used to write changes to code in Dev and Multidev environments, where the code base is writable. Cloning databases between environments before saving WP-CFM bundles can result in loss of data.</p>
+</div>
 
 ## Install and Deploy WP-CFM
 
@@ -85,7 +90,7 @@ Deploy the `.json` file from Dev to Test.
 
  ```
  terminus env:deploy <site>.test --sync-content --cc --updatedb --note="Deploy code for <bundle_name> configuration"
- ```  
+ ```
 
 2. Import configuration from the codebase into the database by clicking **Pull** for your bundle(s) within the Test environment's WordPress Dashboard (`/wp-admin/options-general.php?page=wpcfm`) or with Terminus:
 
@@ -99,7 +104,7 @@ Deploy the `.json` file from Dev to Test.
 
  ```
  terminus env:deploy <site>.live --cc --updatedb --note="Deploy code for <bundle_name> configuration"
- ```  
+ ```
 
 2. Import configuration from the codebase into the database by clicking **Pull** within the Live environment's WordPress Dashboard (`/wp-admin/options-general.php?page=wpcfm`) or with Terminus:
 
@@ -120,7 +125,7 @@ Deploy the `.json` file from Dev to Test.
 You can review values on the [All Settings Screen](https://codex.wordpress.org/Option_Reference#All_Settings_Screen) (`/wp-admin/options.php`).
 
 ### How can I extend WP-CFM to track more tables?
-If you want to track configurations in more tables, you must do so using the `wpcfm_configuration_items` hook. For details, see [WP-CFM documentation](http://forumone.github.io/wp-cfm/).
+If you want to track configurations in more tables, you must do so using the `wpcfm_configuration_items` hook. For details, see [WP-CFM documentation](https://forumone.github.io/wp-cfm/).
 
 ### What's not tracked?
 Site content, posts, users, taxonomy, etc. Review all queries for a page request using the Queries tab of the [Debug Bar](https://wordpress.org/plugins/debug-bar/) plugin to help identify more settings you want to track. This plugin requires that you enable [debugging via `wp-config.php`](/docs/wp-config-php/#frequently-asked-questions).
